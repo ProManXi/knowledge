@@ -1,0 +1,220 @@
+{
+  "main": {
+    "id": "6364e000babcd83a",
+    "type": "split",
+    "children": [
+      {
+        "id": "1ceaf350fc7cf1a0",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "96d82293fb8949ef",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "c607690b1d781512",
+    "type": "split",
+    "children": [
+      {
+        "id": "1fdb93de011a0048",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "9e580119be9267b5",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "b13f3505f6cd2db9",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "tag:uploads",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "6a018fa68a4f92db",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "4a75fbbb2fd0cab8",
+    "type": "split",
+    "children": [
+      {
+        "id": "e9f7b2fed16719cc",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5660087fb0e86d76",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "aba142000d54e063",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "67793ea5ef7592ee",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "4ccdf5cb7e990853",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "440c026f65b92aee",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "96d82293fb8949ef",
+  "lastOpenFiles": [
+    "projects/forge/analysis/anl-2026-04-05-pipeline-yaml-syntax-comparison.md",
+    "projects/forge/analysis",
+    "projects/forge/systems/sys-vault-secrets.md",
+    "projects/forge/systems",
+    "projects/forge/features/feat-artifacts/updates/upd-2026-05-18-artifact-deduplication-reduces-storage-costs.md",
+    "projects/forge/features/feat-artifacts/updates",
+    "projects/forge/features/feat-artifacts/decisions/dec-artifact-storage-deduplication-approach.md",
+    "projects/forge/features/feat-artifacts/decisions",
+    "projects/forge/features/feat-artifacts/tickets/tkt-2026-05-23-customer-needs-cross-pipeline-artifact-dependencies.md",
+    "projects/forge/features/feat-artifacts/tickets",
+    "projects/forge/features/feat-artifacts/incidents/inc-2026-05-10-s3-multipart-upload-leak-cost-spike.md",
+    "projects/forge/features/feat-artifacts/incidents",
+    "projects/forge/features/feat-artifacts/bugs/bug-2026-05-26-cache-restore-fails-silently-permission-denied.md",
+    "projects/forge/features/feat-artifacts/bugs/bug-2026-05-22-cleanup-worker-deletes-referenced-blobs.md",
+    "projects/forge/features/feat-artifacts/bugs",
+    "projects/forge/features/feat-artifacts/sessions/ses-2026-05-02-implement-cache-key-system-branch-scoping.md",
+    "projects/forge/features/feat-artifacts/sessions/ses-2026-05-18-implement-content-addressed-deduplication.md",
+    "projects/forge/features/feat-artifacts/sessions",
+    "projects/forge/features/feat-execution/analysis/anl-2026-05-08-evaluate-build-step-caching-strategies.md",
+    "projects/forge/features/feat-execution/analysis",
+    "projects/forge/features/feat-execution/updates/upd-2026-05-12-pipeline-cancellation-graceful-shutdown.md",
+    "projects/forge/features/feat-execution/updates",
+    "projects/forge/features/feat-execution/decisions/dec-container-runtime-isolation-strategy.md",
+    "projects/forge/features/feat-execution/tickets/tkt-2026-05-16-customer-needs-self-hosted-runner-support.md",
+    "projects/forge/features/feat-execution/incidents/inc-2026-05-06-mass-pipeline-failures-node-pool-exhaustion.md",
+    "projects/forge/features/feat-execution/bugs/bug-2026-05-20-matrix-expansion-exceeds-memory-large-matrices.md",
+    "projects/forge/features/feat-execution/bugs/bug-2026-04-25-dag-scheduler-deadlocks-diamond-dependencies.md",
+    "projects/forge/features/feat-execution/sessions/ses-2026-05-12-implement-pipeline-cancellation-graceful-shutdown.md",
+    "projects/forge/features/feat-execution/sessions/ses-2026-04-10-implement-dag-scheduler-parallel-dispatch.md",
+    "projects/forge/features/feat-artifacts/info-artifacts.md",
+    "projects/forge/features/feat-artifacts/feat-artifacts.md",
+    "projects/forge/features/feat-execution/info-execution.md",
+    "projects/forge/features/feat-execution/feat-execution.md",
+    "projects/forge/forge.md",
+    "projects/nexus/features/feat-dashboards/analysis/anl-2026-04-22-compare-dashboard-grid-layout-libraries.md",
+    "projects/nexus/systems/sys-schema-registry.md",
+    "Untitled.canvas"
+  ]
+}
