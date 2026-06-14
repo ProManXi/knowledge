@@ -1,0 +1,30 @@
+{
+  "_comment": "Registry of AI tools the knowledge kit installs into. Edit INSTRUCTIONS.md for behavior; edit this file to add/remove tools, then re-run install.py. To add a tool: copy an entry, set name/target/scope. scope=global installs once per machine; scope=project generates a per-repo file (managed between KNOWLEDGE-KIT markers, so it never clobbers a project's own rules).",
+  "tools": {
+    "claude-code": {
+      "enabled": true,
+      "scope": "global",
+      "channel": "skills",
+      "target": "~/.claude/skills",
+      "note": "Thin launcher skills copied here; real logic is read live from <vault>/_kit/INSTRUCTIONS.md."
+    },
+    "copilot": {
+      "enabled": true,
+      "scope": "project",
+      "channel": "file",
+      "target": ".github/copilot-instructions.md"
+    },
+    "cursor": {
+      "enabled": true,
+      "scope": "project",
+      "channel": "file",
+      "target": ".cursorrules"
+    },
+    "cline": {
+      "enabled": true,
+      "scope": "project",
+      "channel": "file",
+      "target": ".clinerules"
+    }
+  }
+}
