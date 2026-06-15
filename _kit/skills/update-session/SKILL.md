@@ -13,6 +13,16 @@ You are running the **update-session** command of the knowledge kit.
 
 ## 2. Load the rules
 - Read `<vault>/_kit/INSTRUCTIONS.md` and `<vault>/_guide.md` fully and follow them.
+- Every file you write obeys the **Living History** rule (INSTRUCTIONS.md): read the file fully,
+  refresh current-state sections to today, append/compact the `## Evolution` trail.
+
+## 2.5 Branch: did we review a PR?
+- If this conversation reviewed a pull request (read/critiqued a diff, ran `code-review`, discussed
+  PR findings, approved/requested changes) → run the **PR Review Flow** in INSTRUCTIONS.md:
+  resolve/create the feature, then (for a bugfix) resolve/create the bug, then create the
+  `pr-reviews/pr-YYYY-MM-DD-{desc}.md` entity and link PR ↔ bug ↔ feature. Use the visual,
+  plain-language PR template from `_guide.md`. Then continue with steps 3-7 to log the session.
+- Otherwise → continue with the normal flow below.
 
 ## 3. Session file
 - Find or create today's `ses-YYYY-MM-DD-{desc}.md` under the right feature in
@@ -29,6 +39,14 @@ You are running the **update-session** command of the knowledge kit.
 ## 5. File tracking
 - Record every source file touched in the entity's `files:` YAML (with role) AND add new files
   to the feature's `## File Map`.
+
+## 5.5 Skill extraction
+- Scan the session for reusable patterns, gotchas, or architectural rules (criteria in INSTRUCTIONS.md §Skill Extraction).
+- List `<vault>/projects/{project}/skills/` for existing skills (Read Before Write).
+- For each qualified candidate: create or surgically update `skl-{name}.md` in the vault under `projects/{project}/skills/`.
+- If `.knowledge.json` is in the current working directory (running from code repo): also write/update `.claude/skills/{category}/SKILL.md` using SKILL.md frontmatter (`name`, `description`, `origin: extracted-from-session-YYYY-MM-DD`) + same content body.
+- **Register into the project's skill-gate tables** (when running from the code repo): classify each extracted skill into a lifecycle stage and idempotently add a row to that stage's gate table in `CLAUDE.md` (or the repo's primary AI instruction file) — **Pre-Check-in** (write-time, before commit) or **Pre-PR** (review-time). Create the `## {Stage} Skill Gate` section if missing; keep the set of tables small (≤3-4) so every skill falls under one. See INSTRUCTIONS.md §Skill Extraction.
+- Tell the user what was extracted/updated and which gate table it was registered in, or skip silently if nothing qualifies.
 
 ## 6. Spec
 - Reconcile `<vault>/projects/{project}/spec.md` if architecture/behaviors changed.
