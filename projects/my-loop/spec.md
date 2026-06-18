@@ -6,6 +6,7 @@ status: active
 role: spec
 author: robin
 date: 2026-06-02
+updated: 2026-06-14
 tags: [spec, architecture, consolidated]
 ---
 
@@ -76,6 +77,7 @@ flowchart TD
 - **Speed check**: Consecutive GPS points must be physically walkable (≤30 km/h, ≤60m per 5s interval). Allows 5% violations for GPS drift.
 - **Duration check**: Path must have ≥50% of expected GPS samples for the distance walked
 - **Smoothness check**: Bearing standard deviation must be >2°. Real GPS has natural jitter; spoofed linear paths are suspiciously smooth.
+- **Batch-step path coverage (abb321a)**: the real-time batch-step claim path (the PRIMARY way players claim) is now validated too, via `ValidateConsecutivePoints` — each GPS hop is bounded by `MaxSpeed × elapsedTime + 30m` drift margin using real `CapturedAt` timestamps; rejected with `400 Anti-cheat: …` over the same 5% tolerance. Previously only loop claims were checked, so a spoofer could teleport on the batch path.
 - Rejects GPS spoofers, car drivers disguised as walkers, teleportation hacks
 
 ### 4. Push Notifications (Territory Theft Alerts)
@@ -441,7 +443,8 @@ sequenceDiagram
 | Rate abuse | 20 claims/day + API-level rate limiting |
 | Injection | Parameterized EF Core queries only. No raw SQL. Input validation at boundaries. |
 | Unauthorized access | JWT [Authorize] on all mutation endpoints |
-| Account deletion | Full GDPR-compliant cascade delete (user + cells + claims + transfers + tokens) |
+| BOLA / IDOR (cross-user reads) | Missions/XP endpoints enforce self-only access via `DenySelf` (403 when caller ≠ route user) — abb321a, CRITICAL-2. AchievementsController still pending same audit. |
+| Account deletion | Full GDPR cascade: `DeleteUserData` explicitly purges all 8 child tables (cells, transfers, claims, leaderboard entries, explored cells, daily missions, achievements, device tokens) — no DB-level FK cascades exist, so explicit purge is mandatory (abb321a, CRITICAL-3) |
 | Data in transit | HTTPS enforced (ngrok/production TLS) |
 | Cooldown bypass | Server-enforced cooldown check. Client cannot override. |
 
@@ -481,6 +484,7 @@ sequenceDiagram
 |--------|----------|---------|
 | POST | `/api/claims` | Submit territory claim (GPS path — loop/trail) |
 | POST | `/api/claims/step` | Single-step hex claim (during active walk) |
+| POST | `/api/claims/batch-step` | Batched step claims drained from offline WAL (anti-cheat validated) |
 | POST | `/api/claims/trail` | Trail/loop claim (end of walk) |
 | POST | `/api/claims/preview` | Preview which hexes path would capture (no DB write) |
 
@@ -524,7 +528,14 @@ sequenceDiagram
 - **Delta-push architecture (5 state slices + per-user SignalR groups + hydration on login)**
 - **Step claim with real-time push (claim → stats/xp/missions/achievements pushed per step)**
 - **Victim notification via SignalR (hexCount decremented in real-time when hex stolen)**
-- Anti-cheat (3-layer path validation)
+- Anti-cheat (3-layer path validation on loop claims **+ per-hop validation on the batch-step path** — abb321a)
+- Resilient SignalR broadcasts (per-region failure isolation + non-throwing personal pushes — abb321a)
+- Real walked distance tracked on the batch-step path (feeds Distance achievement, leaderboard, WalkDistance mission — abb321a)
+- Crash-safe offline claim queue (on-disk WAL with atomic write + backoff drainer + permanent-vs-transient failure handling — abb321a; writes serialized via a write-lock so a concurrent enqueue/rewrite can't drop a queued point — PR #17, regression-tested in PR #25)
+- Background-capable GPS tracking (Android foreground service + iOS background updates keep the path recording with the screen off — PR #26, issue #20)
+- Offline login persistence (identity-bound `ProfileCache` lets an authenticated user enter offline; restore gated on Firebase UID to prevent cross-user session inheritance — PR #24)
+- Offline last-known data (same identity-bound, file-backed cache pattern as `ProfileCache`): owned hexes render on the Start Journey map via `TerritoryCache` (PR #44, issue #33, in review); Daily Mission + Area Exploration home cards via `GameStateCache` (PR #45, issue #34, approved). Cross-user guard + cleared on sign-out/account-deletion. See skill `offline-first-user-bound-cache`.
+- Offline journey-start guard (blocks Start Journey when the server is unreachable, since hex capture is server-authoritative — PR #43, issue #35, in review)
 - Push notifications (FCM integration, theft alerts)
 - Leaderboard (city/country/world, daily refresh, achievement counters)
 - User profiles (public + own, tier badges, player titles)
@@ -552,12 +563,17 @@ sequenceDiagram
 - Commercial map tile provider
 - Remove `DevTestPush` dev endpoint from ClaimsController
 - Wire `HexOwnershipChanged` event to live-update hex polygons on map screen (currently hexes only load on init/refresh)
+- **Deferred from abb321a audit (need coordinated fixes, not naive ones):**
+  - CRITICAL-9: web 53-bit `cellId` overflow — needs backend string serialization + frontend type migration, validated on a real web build
+  - HexCount reconciliation — a blanket reconcile would wipe seeded/bot users whose HexCount isn't cell-backed
+  - Mission timezone — needs one consistent per-user "today" across all endpoints or it creates duplicate daily-mission rows
+  - AchievementsController self-only audit (missions/XP already guarded)
 
 ### 💡 Future Roadmap
 - Seasons (monthly competitive periods with rewards)
 - Territory defense bonus (longer held = harder to steal)
 - Alliance system (pool territory with friends)
-- Offline mode (cache tiles + queue claims)
+- Offline mode: ~~queue claims~~ **done** (crash-safe WAL + drainer, abb321a); tile caching still pending
 - Martin vector tiles (when cells exceed 5K per viewport)
 - Cycling/driving modes (different speed thresholds)
 - Device attestation (Play Integrity / App Attest)

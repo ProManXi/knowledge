@@ -1,5 +1,4 @@
 ---
-id: 76
 type: feature
 title: Profile & Avatars — Info
 project: my-loop
@@ -35,6 +34,7 @@ tags: [profile, avatar, firebase-auth, identity, achievements]
 - Providers: `authServiceProvider` (Provider), `authStateProvider` (StreamProvider<User?>)
 - `main.dart`: `await Firebase.initializeApp()` before `runApp()`
 - **Auto-login on app restart**: `LoginScreen` is now a `ConsumerStatefulWidget`. In `initState` → `addPostFrameCallback` → checks `authService.currentUser`. If non-null (Firebase session persists automatically), shows spinner, calls `_routeAfterAuth(uid)` which does: `getUserByUid` → `getLeaderboard` (for rank) → `setFromApi(all fields including rank)` → `context.go('/home')`. No token storage code needed — Firebase handles it.
+- **Offline login persistence (PR #24, issue #19)**: `ProfileCache` (`shared/services/profile_cache.dart`) stores the last profile on disk, written after each successful login (`save(firebaseUid, profile)`) and cleared on sign-out / account deletion. If the backend is unreachable on launch, `_routeAfterAuth`'s `catch` calls `_restoreOfflineSession(error, firebaseUid)`: when the error is a connectivity failure (`isServerUnreachable`) and a cached profile exists, it restores the session offline instead of stranding the user on login. The cache is a `CachedProfile { firebaseUid, profile }` and restore is gated on `cached.firebaseUid == firebaseUid` so a second account on the same device cannot inherit the first user's session offline (see [[bug-2026-06-15-offline-restore-cross-user-identity]]). `decode` returns `null` without `firebaseUid` → legacy caches are safely dropped on upgrade.
 - Login screen is a `ConsumerStatefulWidget` (converted from ConsumerWidget for auto-login lifecycle)
 - `_routeAfterAuth(uid)`: fetches full user profile + rank → `setFromApi(all fields)` → init push notifications → gets Firebase ID token → connects SignalR (with token + userId) → calls `hydrateAllSlices(ref)` → navigates to `/home`
 - `_devSkip()`: Same pattern as `_routeAfterAuth` — connects SignalR + hydrates after setFromApi
@@ -61,9 +61,11 @@ tags: [profile, avatar, firebase-auth, identity, achievements]
 ### Edge Cases
 - `GoogleSignIn.instance.initialize()` must only be called once (guarded by `_googleInitialized` bool)
 - Apple sign-in requirement: must support "Hide My Email" relay
-- Account deletion: GDPR compliance — delete all user data, reassign territory to "unclaimed"
+- Account deletion: GDPR compliance — `UserService.DeleteUserData` now `ExecuteDeleteAsync`-purges **all 8 child tables** (TerritoryCells, CellTransfers, Claims, LeaderboardEntries, ExploredCells, DailyMissions, UserAchievements, DeviceTokens) before the user row (abb321a, CRITICAL-3). There are NO DB-level FK cascades (confirmed in AppDbContext), so these explicit purges are mandatory — previously only 4 of 8 were purged, leaving ExploredCells/DailyMissions/UserAchievements/DeviceTokens orphaned.
 - Display name moderation: profanity filter on server
 - Auth errors caught with try/catch, shown as red SnackBar
+- Offline restore must be identity-bound: only restore the cached profile when its `firebaseUid` matches the currently-authenticated user. A bare `currentUser != null` check is insufficient — because `ProfileCache.save` runs only *after* the server call succeeds, a second user authenticating while the backend is down would otherwise inherit the previous user's cached session (cross-user identity / IDOR risk). Fixed in `1e578ff` ([[bug-2026-06-15-offline-restore-cross-user-identity]]).
+- `isServerUnreachable` distinguishes connectivity failures (restore offline) from real HTTP error responses like 500 (server reachable → do NOT restore a stale cache)
 
 ## File Map
 - `mobile/lib/features/auth/login_screen.dart` — ConsumerStatefulWidget, Google + Apple sign-in buttons, SKIP dev mode, SignalR connect + hydrate on auth
@@ -74,13 +76,16 @@ tags: [profile, avatar, firebase-auth, identity, achievements]
 - `mobile/lib/features/achievements/achievements_screen.dart` — Dedicated tab, tappable tiles with bottom sheet details, Icons.hexagon header
 - `mobile/lib/shared/models/achievements.dart` — 100 achievements with star tiers + descriptions
 - `mobile/lib/shared/models/player_titles.dart` — PlayerTitle model, getTitle(hexCount), 6 tiers (Drifter→Grid Dominator)
-- `mobile/lib/shared/services/auth_service.dart` — Firebase Auth + Google + Apple
+- `mobile/lib/shared/services/auth_service.dart` — Firebase Auth + Google + Apple; clears `ProfileCache` on sign-out
+- `mobile/lib/shared/services/profile_cache.dart` — On-disk `CachedProfile {firebaseUid, profile}`; `encode`/`decode`/`save`/`load`/`clear`; identity-bound offline session restore (PR #24)
+- `mobile/test/login_persist_test.dart` — Tests for `ProfileCache` codec (UID round-trip, missing-UID rejection) + `isServerUnreachable` (PR #24)
 - `mobile/lib/shared/services/user_state.dart` — `UserProfile` + `UserProfileNotifier` (Riverpod Notifier)
 - `mobile/lib/shared/state/profile_slice.dart` — ProfileState Notifier (hexCount, streak, distanceKm, rank) — updated via SignalR push
 - `mobile/lib/shared/state/hydration.dart` — Orchestrates full state load from GET /game-state into all slices
 - `mobile/lib/main.dart` — Firebase.initializeApp() in try-catch (web doesn't have firebase_options)
 - `api/MyLoop.Api/Entities/User.cs` — Added `AuthProvider` field
-- `api/MyLoop.Api/Endpoints/UserEndpoints.cs` — Register handles local/federated, deduplicates, `local_<guid>` UID generation
+- `api/MyLoop.Api/Controllers/UsersController.cs` — Register/profile/game-state/delete endpoints (thin; was previously documented as a non-existent `Endpoints/UserEndpoints.cs`)
+- `api/MyLoop.Api/Services/UserService.cs` — Register (local/federated dedup, `local_<guid>` UID generation), profile queries, `DeleteUserData` full 8-table GDPR cascade (abb321a)
 - `api/MyLoop.Api/Program.cs` — ALTER TABLE adds AuthProvider column if missing (safe for existing DBs)
 
 ## Integration Points
@@ -96,6 +101,9 @@ tags: [profile, avatar, firebase-auth, identity, achievements]
 - Username uniqueness: global or per-city?
 - ~~Achievement progress tracking: client-side cache or always fetch from API?~~ → Resolved: push via SignalR (AchievementUnlocked event), hydrated from GET /game-state on login
 - Custom avatar creator SDK (Ready Player Me or similar) — deferred post-MVP
+
+## Evolution
+- 2026-06-15 — Documented offline login persistence (`ProfileCache` / `_restoreOfflineSession`, PR #24, issue #19) and the identity-binding requirement found in review ([[bug-2026-06-15-offline-restore-cross-user-identity]], fixed `1e578ff`). Added File Map entries for `profile_cache.dart` + `login_persist_test.dart`.
 
 # Related
 - [[feat-profile]]

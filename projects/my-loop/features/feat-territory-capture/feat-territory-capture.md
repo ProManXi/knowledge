@@ -1,5 +1,4 @@
 ---
-id: 69
 type: feature
 title: Territory Capture
 project: my-loop

@@ -99,7 +99,7 @@ function renderTagResults(tag, entityIds, allEntities) {
           ${items.map(entity => `
             <div class="tags-entity-item" data-id="${entity.id}">
               <div class="tags-entity-main">
-                <span class="entity-id-badge small">${workItemId(entity.yaml.type, entity.numericId)}</span>
+                <span class="entity-id-badge small">${workItemId(entity)}</span>
                 <span class="tags-entity-title">${sanitize(entity.yaml.title || entity.id)}</span>
               </div>
               <div class="tags-entity-meta">

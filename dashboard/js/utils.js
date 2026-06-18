@@ -20,7 +20,8 @@ export function getTypeIcon(type) {
     ticket: 'bi-ticket-detailed-fill',
     feature: 'bi-diamond-fill',
     system: 'bi-gear-fill',
-    project: 'bi-folder-fill'
+    project: 'bi-folder-fill',
+    'pr-review': 'bi-git'
   };
   return icons[type] || 'bi-circle';
 }
@@ -36,7 +37,8 @@ export const TYPE_COLORS = {
   decision: '#6f42c1',
   update: '#198754',
   ticket: '#ffc107',
-  system: '#20c997'
+  system: '#20c997',
+  'pr-review': '#8957e5'
 };
 
 /** Renders a status badge HTML string. */
@@ -62,24 +64,17 @@ export function humanizeId(id) {
   const cleaned = id.replace(/^[a-z]+-\d{4}-\d{2}-\d{2}-/, '');
   if (cleaned === id) {
     // No date prefix, just clean dashes
-    return id.replace(/^(feat|info|sys|dec|ses|bug|inc|tkt|upd)-/, '').split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    return id.replace(/^(feat|info|sys|dec|ses|bug|inc|tkt|upd|anl|skl|pr)-/, '').split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   }
   return cleaned.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
-/** Generates a WorkItem-style ID like BUG-7, SES-4, TKT-15. */
-export function workItemId(type, numericId) {
-  const prefixes = {
-    bug: 'BUG',
-    incident: 'INC',
-    session: 'SES',
-    decision: 'DEC',
-    update: 'UPD',
-    ticket: 'TKT',
-    feature: 'FEAT',
-    system: 'SYS',
-    project: 'PROJ'
-  };
-  const prefix = prefixes[type] || 'ITEM';
-  return `${prefix}-${numericId || 0}`;
+/**
+ * Returns an entity's work-item label for display. The label is computed by the
+ * builder (`build_data.py` → `work_item_label`): the real tracker reference when the
+ * entity has one (e.g. `#24`, `AB#5678`, `PROJ-42`), otherwise a typed date/name
+ * fallback (e.g. `SES·2026-06-18`). Pass the entity / node / timeline-item object.
+ */
+export function workItemId(entity) {
+  return (entity && entity.workItem) || '';
 }

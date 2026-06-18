@@ -32,4 +32,9 @@ TABLE date, project, feature, author FROM "" WHERE type = "session" SORT date DE
 
 ## Projects
 
-- [[ai-workday]]
+- [[cloud-pay]]
+- [[dev-forge]]
+- [[health-pulse]]
+- [[knowledge-kit]]
+- [[my-loop]]
+- [[shop-stream]]

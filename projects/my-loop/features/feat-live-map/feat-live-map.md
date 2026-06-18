@@ -1,5 +1,4 @@
 ---
-id: 70
 type: feature
 title: Live Map
 project: my-loop

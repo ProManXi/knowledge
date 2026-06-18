@@ -1,5 +1,4 @@
 ---
-id: 72
 type: feature
 title: Profile & Avatars
 project: my-loop

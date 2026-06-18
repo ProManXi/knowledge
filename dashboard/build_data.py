@@ -131,6 +131,53 @@ def extract_summary(content, yaml):
     return " ".join(lines[:2])[:200]
 
 
+TYPE_PREFIX = {
+    "bug": "BUG",
+    "incident": "INC",
+    "session": "SES",
+    "decision": "DEC",
+    "update": "UPD",
+    "ticket": "TKT",
+    "pr-review": "PR",
+    "feature": "FEAT",
+    "system": "SYS",
+    "project": "PROJ",
+    "analysis": "ANL",
+    "skill": "SKL",
+}
+
+
+def work_item_label(yaml, slug):
+    """Display label for an entity.
+
+    When the entity carries a real tracker reference (`ref-id`, or `pr-number` for PR reviews),
+    show it the way the tracker shows it. Otherwise fall back to a typed date/name label
+    (e.g. `SES·2026-06-18`, `DEC·delta-push`) — never a synthetic incrementing number.
+    """
+    ref = yaml.get("ref-id")
+    if ref is None or not str(ref).strip():
+        ref = yaml.get("pr-number")
+    if ref is not None and str(ref).strip():
+        ref = str(ref).strip()
+        tracker = (yaml.get("tracker") or "").lower()
+        if tracker in ("github", "gitlab") or (not tracker and yaml.get("type") == "pr-review"):
+            return ref if ref.startswith("#") else f"#{ref}"
+        if tracker == "azure":
+            return ref if ref.upper().startswith("AB#") else f"AB#{ref}"
+        # jira / linear / unknown: keys are already namespaced (e.g. PROJ-42)
+        return ref
+
+    prefix = TYPE_PREFIX.get(yaml.get("type"), "ITEM")
+    date = yaml.get("date")
+    if isinstance(date, str) and re.match(r"^\d{4}-\d{2}-\d{2}$", date):
+        return f"{prefix}·{date}"
+    m = re.match(r"^[a-z]+-(\d{4}-\d{2}-\d{2})-", slug)
+    if m:
+        return f"{prefix}·{m.group(1)}"
+    tail = re.sub(r"^(feat|info|sys|dec|skl|anl|upd|tkt|bug|inc|ses|pr)-", "", slug)
+    return f"{prefix}·{tail}"
+
+
 def scan_vault():
     entities = []
     if not os.path.isdir(PROJECTS_DIR):
@@ -145,16 +192,11 @@ def scan_vault():
             yaml = parse_yaml(content)
             sections = extract_sections(content)
             rel = os.path.relpath(full, VAULT_ROOT).replace("\\", "/")
-            numeric_id = None
-            if yaml.get("id"):
-                try:
-                    numeric_id = int(str(yaml["id"]))
-                except ValueError:
-                    numeric_id = None
+            slug = name[:-3]
             entities.append(
                 {
-                    "id": name[:-3],
-                    "numericId": numeric_id,
+                    "id": slug,
+                    "workItem": work_item_label(yaml, slug),
                     "filename": name,
                     "path": rel,
                     "folder": os.path.dirname(rel),
@@ -213,7 +255,7 @@ def build_timeline(entities):
     items = [
         {
             "id": e["id"],
-            "numericId": e["numericId"],
+            "workItem": e["workItem"],
             "date": e["yaml"].get("date"),
             "type": e["yaml"].get("type"),
             "role": e["yaml"].get("role"),
@@ -236,6 +278,7 @@ def build_stats(entities):
 
     bugs, incidents, sessions = of("bug"), of("incident"), of("session")
     decisions, updates, tickets = of("decision"), of("update"), of("ticket")
+    pr_reviews = of("pr-review")
     return {
         "totalEntities": len(entities),
         "openBugs": len([b for b in bugs if b["yaml"].get("status") in ("open", "in-progress")]),
@@ -248,16 +291,22 @@ def build_stats(entities):
         "totalUpdates": len(updates),
         "totalTickets": len(tickets),
         "openTickets": len([t for t in tickets if t["yaml"].get("status") in ("open", "in-progress")]),
+        "totalPRReviews": len(pr_reviews),
+        "openPRReviews": len([p for p in pr_reviews if p["yaml"].get("status") in ("open", "changes-requested")]),
         "criticalItems": len([e for e in entities if e["yaml"].get("severity") == "critical"]),
         "highItems": len([e for e in entities if e["yaml"].get("severity") == "high"]),
     }
 
 
 def build_relationship_graph(entities):
+    # PR reviews are intentionally kept OUT of the Connections graph.
+    pr_ids = {e["id"] for e in entities if e["yaml"].get("type") == "pr-review"}
+    entities = [e for e in entities if e["id"] not in pr_ids]
+
     nodes = [
         {
             "id": e["id"],
-            "numericId": e["numericId"],
+            "workItem": e["workItem"],
             "type": e["yaml"].get("type"),
             "role": e["yaml"].get("role"),
             "title": e["yaml"].get("title") or e["yaml"].get("name") or e["id"],

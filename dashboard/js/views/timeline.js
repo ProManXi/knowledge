@@ -38,7 +38,7 @@ export function renderTimeline() {
         ${grouped[date].map(ev => `
           <div class="timeline-event" data-id="${ev.id}">
             <span class="timeline-event-type ${ev.type}">${ev.type}</span>
-            <span class="entity-id">${workItemId(ev.type, ev.numericId)}</span>
+            <span class="entity-id">${workItemId(ev)}</span>
             <span class="timeline-event-title">${sanitize(ev.title)}</span>
             ${severityBadge(ev.severity)}
             ${statusBadge(ev.status)}

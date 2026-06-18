@@ -50,7 +50,7 @@ tags: [xp, levels, missions, achievements, badges, retention, adaptive]
 
 **Mission Types:**
 - `CaptureHexes` (N hexes)
-- `WalkDistance` (~30m per hex, approximate)
+- `WalkDistance` (real GPS metres since abb321a — was a ~30m-per-hex approximation; batch path now feeds `IGeoService.CalculatePathDistance` into the mission)
 - `StealHex` (capture from another player)
 - `ExploreNewArea` (claim cells never visited before)
 - `MaintainStreak` (keep streak alive today)
@@ -86,6 +86,7 @@ tags: [xp, levels, missions, achievements, badges, retention, adaptive]
 - Worst case convergence: 5 iterations (initial + 4 level achievements + 1 empty verification)
 - Progress % capped at 1.0 via `Math.Min(1.0, current/threshold)`
 - Distance achievements use integer truncation (`(int)DistanceKm`)
+- **Offline home cards (client-side, PR #45 / issue #34, approved)**: hydration (`hydrateAllSlices` / `hydrateAllSlicesFromRef`) caches the `missions` + `exploration` payloads to a file-backed, user-bound `GameStateCache` on every successful load. When `getGameState` returns `null` (offline; it logs the failure), the missions + exploration slices are restored from cache so the Daily Mission and Area Exploration cards show last-known values instead of empty states. Profile stays with `ProfileCache` (#19); achievements are deliberately not restored offline (stale unlock state is undesirable). Cross-user binding guard + cleared on sign-out/account-deletion. See [[skl-offline-first-user-bound-cache]].
 
 ### Edge Cases
 
@@ -101,7 +102,8 @@ tags: [xp, levels, missions, achievements, badges, retention, adaptive]
 - `api/MyLoop.Api/Services/AchievementService.cs` — Achievement checking with convergence loop
 - `api/MyLoop.Api/Constants/Achievements.cs` — 30 static achievement definitions
 - `api/MyLoop.Api/Constants/GameConstants.cs` — XP values, level formula, missions per day
-- `api/MyLoop.Api/Controllers/MissionsController.cs` — GET /api/missions/{userId}, GET /api/missions/xp/{userId}
+- `api/MyLoop.Api/Controllers/MissionsController.cs` — GET /api/missions/{userId}, GET /api/missions/xp/{userId}. **`[Authorize]` + `DenySelf(routeUserId)` guard (abb321a)**: injects `ICurrentUser`, returns 401 when unauthenticated / 403 when caller ≠ route user, on both endpoints. Closes the BOLA hole where any caller could read any user's missions/XP by GUID.
+- `api/MyLoop.Api/Interfaces/ICurrentUser.cs` — abstraction over the authenticated caller's id (used by `DenySelf`)
 - `api/MyLoop.Api/Controllers/AchievementsController.cs` — GET /api/achievements/{userId} [Authorize]
 - `api/MyLoop.Api/Entities/DailyMission.cs` — Mission entity (Id, UserId, Date, Type, Target, Progress, XpReward, CompletedAt)
 - `api/MyLoop.Api/Entities/UserAchievement.cs` — Achievement unlock record (Id, UserId, AchievementId, UnlockedAt, XpAwarded)
@@ -112,7 +114,10 @@ tags: [xp, levels, missions, achievements, badges, retention, adaptive]
 - `mobile/lib/shared/models/daily_mission.dart` — DailyMission + XpInfo models. `copyWith({int? currentProgress, bool? isCompleted, DateTime? completedAt})` + `bool get completed` convenience getter.
 - `mobile/lib/shared/models/achievement.dart` — Achievement model with category name getter. `copyWith({bool? unlocked, DateTime? unlockedAt, double? progress})`.
 - `mobile/lib/shared/models/trail_claim_response.dart` — StepClaimResponse + AchievementUnlocked
-- `mobile/lib/shared/services/api_service.dart` — getDailyMissions, getXpInfo, getAchievements, getGameState
+- `mobile/lib/shared/services/api_service.dart` — getDailyMissions, getXpInfo, getAchievements, getGameState (returns null + logs warning on offline/error)
+- `mobile/lib/shared/state/hydration.dart` — `hydrateAllSlices`/`…FromRef`: fan out game-state into slices; save offline cards on success, restore from `GameStateCache` on offline null (PR #45)
+- `mobile/lib/shared/services/game_state_cache.dart` — file-backed, user-bound offline cache of missions + exploration payloads; save-on-success / restore-on-offline, cross-user guard (PR #45, issue #34)
+- `mobile/test/game_state_offline_cache_test.dart` — codec + disk-durability + offline-restore (fails-without-fix, via real `hydrateAllSlicesFromRef`) tests (PR #45)
 - `mobile/lib/shared/services/territory_realtime_service.dart` — SignalR event streams: MissionDelta, XpDelta, AchievementUnlocked
 - `mobile/lib/shared/state/xp_slice.dart` — XpState Notifier, hydrate() + applyDelta(XpDelta)
 - `mobile/lib/shared/state/missions_slice.dart` — MissionsState Notifier, hydrate() + applyDelta(MissionDelta)
@@ -129,7 +134,7 @@ tags: [xp, levels, missions, achievements, badges, retention, adaptive]
 
 ## Open Questions
 
-- Should achievements be visible to other players? (Currently: yes, endpoint is [Authorize] but no IDOR check — by design, like profile badges)
+- ~~Should achievements be visible to other players? (endpoint is [Authorize] but no IDOR check)~~ → **Missions/XP endpoints now enforce self-only access** via `DenySelf` (abb321a, 403 on cross-user). AchievementsController still needs the same audit — confirm whether public achievement viewing is intended or should also be self-guarded.
 - Achievement-triggered level-up not surfaced as separate level-up banner to client (only achievement toast shown) — minor UX gap
 - Distance achievements use int truncation: 0.99km → 0% progress on "Walk 1km" — acceptable?
 
@@ -154,3 +159,10 @@ tags: [xp, levels, missions, achievements, badges, retention, adaptive]
 
 **All fired AFTER `SaveChangesAsync` succeeds** — never on uncommitted state.
 - Future: time-limited/seasonal achievements? Would require adding expiry fields to definitions.
+
+## Evolution
+- 2026-06-18 — Created Evolution + Related trail. Documented the offline home-cards cache (`GameStateCache`, PR #45 / issue #34, approved): Daily Mission + Area Exploration now restore from disk when `getGameState` returns null offline. File Map + Known Behavior added. See [[ses-2026-06-18-review-loop-offline-prs]].
+
+# Related
+- [[feat-progression]]
+- [[skl-offline-first-user-bound-cache]]

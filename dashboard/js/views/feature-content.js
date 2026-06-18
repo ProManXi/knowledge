@@ -95,7 +95,7 @@ function renderFeatureCard(item) {
   return `
     <div class="feature-card" data-id="${item.id}" style="--card-accent:${typeColor}">
       <div class="feature-card-top">
-        <span class="feature-card-id">${workItemId(yaml.type, item.numericId)}</span>
+        <span class="feature-card-id">${workItemId(item)}</span>
         ${yaml.severity ? severityBadge(yaml.severity) : ''}
       </div>
       <div class="feature-card-title">${sanitize(yaml.title || item.id)}</div>

@@ -18,8 +18,9 @@ You are running the **startday** command of the knowledge kit.
   source of truth; this skill is only the launcher.
 
 ## 3. Morning Brief
-- Scan `<vault>/projects/{project}/` for open/in-progress bugs, tickets, incidents and the most
-  recent sessions/analyses. Group by feature. Present the brief.
+- Scan `<vault>/projects/{project}/` for open/in-progress bugs, tickets, incidents, open/
+  changes-requested PR reviews, and the most recent sessions/analyses. Group by feature. Present
+  the brief.
 - Ask: *"Continue one of these, or start something new?"* — skip if intent is already clear.
 
 ## 4. Prime context

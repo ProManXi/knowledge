@@ -1,5 +1,4 @@
 ---
-id: 74
 type: feature
 title: Live Map — Info
 project: my-loop
@@ -66,7 +65,7 @@ tags: [map, maplibre, geojson, flutter-map, vector-tiles]
 - `mobile/lib/shared/state/exploration_slice.dart` — ExplorationState Notifier (hydrate only)
 - `mobile/lib/shared/state/hydration.dart` — Orchestrator: GET /game-state → distribute to 5 slices
 - `api/MyLoop.Api/Hubs/TerritoryHub.cs` — SignalR hub: JoinRegion, LeaveRegion, JoinUserGroup, LeaveUserGroup
-- `api/MyLoop.Api/Services/TerritoryNotifier.cs` — 5 push methods: hex ownership, stats, xp, missions, achievements
+- `api/MyLoop.Api/Services/TerritoryNotifier.cs` — 5 push methods: hex ownership, stats, xp, missions, achievements. **Resilient since abb321a (HIGH-10)**: `NotifyHexOwnershipChanged` wraps each region send in its own try/catch (one failed region no longer aborts the rest); personal deltas route through generic `SafeSendToUser<T>` that logs and never throws (no more unobserved fire-and-forget task exceptions).
 - `api/MyLoop.Api/Interfaces/ITerritoryNotifier.cs` — Interface + all payload record definitions
 
 ## State Architecture (Map)
@@ -123,6 +122,8 @@ _JourneyMapState
 - All Dart fromJson parsers use null-safe defaults (`as int? ?? 0`) for resilience
 
 **State never refreshed via HTTP after claims** — all updates arrive as pushes.
+
+**Broadcast resilience (abb321a, HIGH-10)**: server-side sends are now failure-isolated — a transport error to one region group or one user no longer cancels the remaining pushes, and personal-delta pushes can no longer throw unobserved. A dropped push is recovered by the next full hydrate on reconnect/resume.
 
 **State Slices (Flutter — 5 independent Notifiers):**
 

@@ -82,7 +82,7 @@ function renderRecentActivity(items) {
     <div class="activity-item" data-id="${item.id}">
       <div class="activity-icon ${item.type}"><i class="bi ${getBootstrapIcon(item.type)}"></i></div>
       <div class="activity-content">
-        <div class="activity-title"><span class="entity-id">${workItemId(item.type, item.numericId)}</span> ${sanitize(item.title)}</div>
+        <div class="activity-title"><span class="entity-id">${workItemId(item)}</span> ${sanitize(item.title)}</div>
         <div class="activity-meta">${item.feature || ''} · ${item.type}</div>
       </div>
       ${statusBadge(item.status)}
@@ -108,7 +108,7 @@ function renderOpenIssues(entities) {
     <div class="activity-item" data-id="${item.id}">
       <div class="activity-icon ${item.yaml.type}"><i class="bi ${getBootstrapIcon(item.yaml.type)}"></i></div>
       <div class="activity-content">
-        <div class="activity-title"><span class="entity-id">${workItemId(item.yaml.type, item.numericId)}</span> ${sanitize(item.yaml.title || item.id)}</div>
+        <div class="activity-title"><span class="entity-id">${workItemId(item)}</span> ${sanitize(item.yaml.title || item.id)}</div>
         <div class="activity-meta">${item.yaml.feature || ''}</div>
       </div>
       ${severityBadge(item.yaml.severity)}
