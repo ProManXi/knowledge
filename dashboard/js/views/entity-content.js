@@ -167,7 +167,7 @@ export function openEntityContent(entityId) {
         <span class="entity-view-icon ${yaml.type}"><i class="${getTypeIcon(yaml.type)}"></i></span>
         <div class="entity-view-title-block">
           <h2 class="entity-view-title">
-            <span class="entity-id-badge">${workItemId(yaml.type, entity.numericId)}</span>
+            <span class="entity-id-badge">${workItemId(entity)}</span>
             ${sanitize(yaml.title || yaml.name || entity.id)}
           </h2>
           <div class="entity-view-meta">
@@ -235,7 +235,7 @@ export function openEntityContent(entityId) {
               if (!linked) return `<div class="entity-link-item">${sanitize(link)}</div>`;
               return `<div class="entity-link-item clickable" data-id="${link}">
                 <span class="entity-link-icon ${linked.yaml.type}"><i class="${getTypeIcon(linked.yaml.type)}"></i></span>
-                <span>${workItemId(linked.yaml.type, linked.numericId)} ${sanitize(linked.yaml.title || linked.yaml.name || link)}</span>
+                <span>${workItemId(linked)} ${sanitize(linked.yaml.title || linked.yaml.name || link)}</span>
               </div>`;
             }).join('')}
           </div>
@@ -285,13 +285,13 @@ function buildCausalChain(entity) {
     if (source) {
       parts.push(`<div class="causal-node clickable" data-id="${targetId}">
         <span class="entity-link-icon ${source.yaml.type}"><i class="${getTypeIcon(source.yaml.type)}"></i></span>
-        <span>${workItemId(source.yaml.type, source.numericId)}</span>
+        <span>${workItemId(source)}</span>
         <span class="causal-title">${sanitize(source.yaml.title || targetId)}</span>
       </div>`);
       parts.push(`<div class="causal-arrow"><i class="bi bi-arrow-right"></i><span class="causal-label">triggered</span></div>`);
       parts.push(`<div class="causal-node current">
         <span class="entity-link-icon ${yaml.type}"><i class="${getTypeIcon(yaml.type)}"></i></span>
-        <span>${workItemId(yaml.type, entity.numericId)}</span>
+        <span>${workItemId(entity)}</span>
         <span class="causal-title">${sanitize(yaml.title || entity.id)}</span>
       </div>`);
     }
@@ -303,13 +303,13 @@ function buildCausalChain(entity) {
     if (source) {
       parts.push(`<div class="causal-node clickable" data-id="${targetId}">
         <span class="entity-link-icon ${source.yaml.type}"><i class="${getTypeIcon(source.yaml.type)}"></i></span>
-        <span>${workItemId(source.yaml.type, source.numericId)}</span>
+        <span>${workItemId(source)}</span>
         <span class="causal-title">${sanitize(source.yaml.title || targetId)}</span>
       </div>`);
       parts.push(`<div class="causal-arrow"><i class="bi bi-arrow-right"></i><span class="causal-label">prompted</span></div>`);
       parts.push(`<div class="causal-node current">
         <span class="entity-link-icon ${yaml.type}"><i class="${getTypeIcon(yaml.type)}"></i></span>
-        <span>${workItemId(yaml.type, entity.numericId)}</span>
+        <span>${workItemId(entity)}</span>
         <span class="causal-title">${sanitize(yaml.title || entity.id)}</span>
       </div>`);
     }
@@ -322,14 +322,14 @@ function buildCausalChain(entity) {
       if (parts.length === 0) {
         parts.push(`<div class="causal-node current">
           <span class="entity-link-icon ${yaml.type}"><i class="${getTypeIcon(yaml.type)}"></i></span>
-          <span>${workItemId(yaml.type, entity.numericId)}</span>
+          <span>${workItemId(entity)}</span>
           <span class="causal-title">${sanitize(yaml.title || entity.id)}</span>
         </div>`);
       }
       parts.push(`<div class="causal-arrow"><i class="bi bi-arrow-right"></i><span class="causal-label">spawned</span></div>`);
       parts.push(`<div class="causal-node clickable" data-id="${targetId}">
         <span class="entity-link-icon ${target.yaml.type}"><i class="${getTypeIcon(target.yaml.type)}"></i></span>
-        <span>${workItemId(target.yaml.type, target.numericId)}</span>
+        <span>${workItemId(target)}</span>
         <span class="causal-title">${sanitize(target.yaml.title || targetId)}</span>
       </div>`);
     }

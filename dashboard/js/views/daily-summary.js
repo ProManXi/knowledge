@@ -165,7 +165,7 @@ function renderForDate(date) {
 
 function renderEntityCard(entity) {
   const { yaml } = entity;
-  const wid = workItemId(yaml.type, entity.numericId);
+  const wid = workItemId(entity);
 
   // Get a richer description from content/sections
   const summary = entity.content.summary || '';

@@ -8,6 +8,22 @@ Analytics-ready by design — every file has consistent YAML queryable via Obsid
 
 ---
 
+## Content Style — write for a time-poor human reader
+
+Every entity is read by busy humans, so write it like a **storyteller**, not a log dump:
+
+- Lead with a short **plain-language narrative** — what happened, why it matters, how it works.
+  No jargon walls. A newcomer (or a fresh Claude session) should grasp it in one read.
+- Use **tables whenever the data is definite/structured** — review findings, fields, steps,
+  comparisons, before/after. Tables scan faster than prose for structured facts.
+- Prefer a small mermaid diagram over a paragraph when explaining a flow.
+- Favor **clarity and scannability over completeness** — capture what matters, link the rest.
+
+The PR-review template below models this (plain language + findings table + mermaid). Apply the same
+spirit to bugs, sessions, info files, incidents, and decisions.
+
+---
+
 ## Folder Structure
 
 ```
@@ -31,6 +47,10 @@ knowledge/
           incidents/                 <- production failures
           updates/                   <- feature changes (add/modify/remove/deprecate)
           decisions/                 <- technical choices and what was rejected
+          pr-reviews/                <- pull-request reviews (linked to bugs/features)
+
+      skills/                        <- reusable Claude operational patterns extracted from sessions
+        skl-{name}.md
 
       analysis/                      <- cross-feature or architectural investigations
 ```
@@ -41,7 +61,7 @@ knowledge/
 
 | Entity    | Prefix  | Pattern                        | Example                                    |
 |-----------|---------|--------------------------------|--------------------------------------------|
-| Project   | —       | `{name}`                       | `ai-workday`                               |
+| Project   | —       | `{name}`                       | `acme-app`                                 |
 | Feature   | `feat-` | `feat-{name}`                  | `feat-payment-retry`                       |
 | Info      | `info-` | `info-{name}`                  | `info-payment-retry`                       |
 | Session   | `ses-`  | `ses-YYYY-MM-DD-{description}` | `ses-2026-05-22-debug-payment-timeout-issue` |
@@ -52,10 +72,12 @@ knowledge/
 | Decision  | `dec-`  | `dec-{name}`                   | `dec-payment-retry-limit-strategy`         |
 | Analysis  | `anl-`  | `anl-YYYY-MM-DD-{description}` | `anl-2026-05-22-understand-retry-lock-behavior` |
 | System    | `sys-`  | `sys-{name}`                   | `sys-payment-api`                          |
+| Skill     | `skl-`  | `skl-{name}`                   | `skl-h3-hex-validation`                    |
+| PR Review | `pr-`   | `pr-YYYY-MM-DD-{description}`  | `pr-2026-06-15-fix-territory-capture-race` |
 
 Rules:
 - Minimum 3 words in the description part of the name (prefer 4+ for clarity)
-- Sessions, bugs, tickets, incidents, updates, analyses: date-first (events in time)
+- Sessions, bugs, tickets, incidents, updates, analyses, pr-reviews: date-first (events in time)
 - Decisions and systems: no date in name (permanent knowledge — date goes in YAML only)
 - Systems: shared infrastructure only — feature-specific system info lives in the info file
 - Use lowercase kebab-case for all descriptions
@@ -67,8 +89,7 @@ Rules:
 ### Universal fields (every file)
 
 ```yaml
-id:       # unique auto-increment integer (never reused, even after deletion)
-type:     # project | feature | session | analysis | bug | ticket | incident | update | decision | system
+type:     # project | feature | session | analysis | bug | ticket | incident | update | decision | system | skill | pr-review
 title:    # human-readable display name (used by dashboard and graph)
 date:     # YYYY-MM-DD
 project:  # project name
@@ -77,6 +98,26 @@ author:   # engineer who created this
 status:   # see per-type values below
 tags:     # [free, form, labels]
 ```
+
+> **No synthetic IDs.** Files are identified by their filename (e.g. `bug-2026-06-18-...`). There is
+> **no** auto-increment `id:` field — it was removed because such numbers collide across projects and
+> carry no real meaning. An entity's displayed work-item badge is its *real* tracker reference (see
+> the work-item fields below); entities with no tracker show a typed date/name label
+> (e.g. `SES·2026-06-18`, `DEC·delta-push`) computed by `build_data.py`.
+
+### Work-item reference (tracked entities: bug, ticket, incident, update, pr-review; session/decision when they map to a work item)
+
+```yaml
+tracker:  # github | azure | jira | gitlab | linear   — the project's tracker; omit if the item has none
+ref-id:   # the tracker's OWN number/key, verbatim: 24 (GitHub/Azure), PROJ-42 (Jira), ENG-7 (Linear)
+ref-url:  # "https://github.com/org/repo/issues/24"   — deep link (optional)
+```
+
+Rules:
+- Capture the work-item ID from the real tracker when one exists. **Never invent or auto-number it.**
+- The repo's `.knowledge.json` may declare a default `tracker` and a `repo-url` base so links can be
+  built consistently. If the work hasn't been filed in a tracker, omit all three fields.
+- Dashboard badge per tracker: GitHub/GitLab → `#24`, Azure → `AB#24`, Jira/Linear → the key verbatim.
 
 ### Role field (feature + system + project files only)
 
@@ -100,7 +141,7 @@ severity: critical | high | medium | low
 # ticket
 severity: critical | high | medium | low
 customer: customer or team name
-linked-ref: EXT-1234   <- external ticket system ID (optional)
+# external tracker reference uses the universal tracker/ref-id/ref-url fields above
 
 # incident
 severity: critical | high | medium | low
@@ -113,6 +154,20 @@ prompted-by: "[[bug-|tkt-|inc-|ses-]]"   <- what caused this decision (omit if i
 change-type:  add | modify | remove | deprecate
 triggered-by: "[[inc-or-bug-that-caused-this]]"   <- chain link
 spawned:      "[[upd-created-as-result]]"          <- set on the incident/bug that triggered it
+
+# skill
+features:     [feat-name, feat-other]              # list; omit or [] for cross-feature skills
+category:     architecture | patterns | testing | performance | security | gotchas | data-model
+repo-path:    ".claude/skills/{category}/SKILL.md" # repo copy location (omit if not synced)
+derived-from: "[[ses-YYYY-MM-DD-xxx]]"             # session that surfaced this knowledge
+
+# pr-review
+status:       open | changes-requested | approved | merged
+kind:         bugfix | feature | refactor | chore   # bugfix → links to a bug; others → link feature only
+tracker:      github                                # the PR's host; drives the badge (#123)
+ref-id:       123                                   # the PR number — this PR *is* the work item
+ref-url:      "https://github.com/org/repo/pull/123" # link to the PR (optional)
+reviews:      "[[bug-YYYY-MM-DD-xxx]]"              # the bug this PR fixes (omit for non-bugfix PRs)
 ```
 
 ### Files field (all work entities — session, bug, ticket, incident, analysis, update)
@@ -154,6 +209,7 @@ Rules:
 | update | planned, in-progress, implemented, reverted |
 | decision | proposed, active, superseded, revoked |
 | system | active, deprecated, decommissioned |
+| skill | active, deprecated, superseded |
 
 ---
 
@@ -327,6 +383,114 @@ TABLE status FROM "projects/{project}/systems" SORT file.name ASC
 
 ---
 
+### Skill  `skl-{name}.md`
+
+```markdown
+---
+type: skill
+title: "{Skill Title}"
+project: {project}
+features: []
+category: {category}
+status: active
+author: {author}
+date: YYYY-MM-DD
+derived-from: "[[ses-]]"
+repo-path: ""
+tags: []
+---
+
+# {Skill Title}
+
+## When to Activate
+<!-- Conditions that should trigger applying this skill -->
+
+## {Core content — patterns, rules, code snippets, checklists}
+
+# Related
+- [[{project}]]
+- [[{derived-from}]]
+```
+
+Every skill is owned by a project: it MUST have a `project:` field and a `[[{project}]]` link in
+`# Related`. Use the `features:` list when it applies to specific features.
+
+---
+
+### PR Review  `pr-YYYY-MM-DD-{description}.md`
+
+Write for a non-technical reader: short sentences, plain words, a diagram. Use a mermaid diagram in
+**How It Works** and a table in **Review Findings** so the page is scannable.
+
+```markdown
+---
+type: pr-review
+title: "{Plain-language PR title}"
+project: {project}
+feature: {feat}
+status: merged
+kind: bugfix
+author: {author}
+date: YYYY-MM-DD
+tracker: github
+ref-id: 123
+ref-url: "https://github.com/org/repo/pull/123"
+reviews: "[[bug-YYYY-MM-DD-xxx]]"   # omit when kind is not bugfix
+files: []
+tags: []
+---
+
+# What This PR Does
+<!-- One or two plain sentences anyone can understand. -->
+
+# Why It Was Needed
+<!-- The problem in everyday language. For a bugfix, say what was broken and why it happened. -->
+
+# How It Works
+```mermaid
+flowchart LR
+  A[Before] --> B[Change in this PR] --> C[After]
+```
+
+# Review Findings
+| Severity | Finding | Resolved? |
+|----------|---------|-----------|
+| —        | —       | —         |
+
+# Linked Bug / Feature
+<!-- What this PR is solving and how it connects to the bug/feature. -->
+
+## Evolution
+- YYYY-MM-DD — PR reviewed and captured.
+
+# Related
+- [[{feat}]]
+- [[bug-YYYY-MM-DD-xxx]]   <- omit for non-bugfix PRs
+```
+
+---
+
+## Evolution / Living History (every living doc)
+
+Living docs (info files, feature/project hubs, specs, bugs, pr-reviews) carry a `## Evolution`
+section — a dated trail of how the doc changed:
+
+```markdown
+## Evolution
+- 2026-06-15 — Created. <initial state>.
+- 2026-06-18 — <what changed and why>.
+```
+
+Rules:
+- **Append** a `- YYYY-MM-DD — <concise change>` line on every meaningful update.
+- **Current-state sections stay current** (Architecture, Known Behaviors, File Map reflect *today*);
+  the Evolution trail records *how it got there*.
+- **Compact as it grows**: merge same-topic lines and roll older months into one summary line, but
+  always keep the creation entry and milestone changes. Never delete the fact that something
+  changed — summarize it.
+
+---
+
 ## Chain Reaction Rules
 
 When a bug, ticket, or incident is resolved AND the fix changes observable feature behavior:
@@ -368,6 +532,7 @@ Updates:    TABLE date, change-type, status FROM "projects/{project}/features/{f
 Bugs:       TABLE date, status, severity FROM "projects/{project}/features/{feat}/bugs" SORT date DESC
 Decisions:  TABLE date, status, decision-type FROM "projects/{project}/features/{feat}/decisions" SORT date DESC
 Incidents:  TABLE date, status, severity FROM "projects/{project}/features/{feat}/incidents" SORT date DESC
+PR Reviews: TABLE date, status, kind, ref-id FROM "projects/{project}/features/{feat}/pr-reviews" SORT date DESC
 ```
 
 **Index Dashboard:**
@@ -385,7 +550,7 @@ Recent Work:    TABLE date, project, feature, author FROM "" WHERE type = "sessi
 
 | Query | Shows |
 |-------|-------|
-| `path:projects/ai-workday` | Everything in one project |
+| `path:projects/acme-app` | Everything in one project |
 | `property:feature:feat-payment-retry` | One feature and all its entities |
 | `property:type:bug` | All bugs across all projects |
 | `property:status:open` | All open items |

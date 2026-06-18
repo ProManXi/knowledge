@@ -1,5 +1,4 @@
 ---
-id: 79
 type: decision
 title: Flutter Over Native and MAUI for Mobile
 date: 2026-05-27

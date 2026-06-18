@@ -191,7 +191,7 @@ export function renderGraph() {
 function buildTooltipElement(node) {
   const el = document.createElement('div');
   el.classList.add('graph-tooltip');
-  const wid = workItemId(node.type, node.numericId);
+  const wid = workItemId(node);
 
   el.innerHTML = `
     <div class="graph-tooltip-id">${wid}</div>

@@ -78,7 +78,7 @@ function renderResults() {
         <tbody>
           ${pageItems.map(e => `
             <tr data-id="${e.id}" role="button">
-              <td><span class="entity-id">${workItemId(e.yaml.type, e.numericId)}</span></td>
+              <td><span class="entity-id">${workItemId(e)}</span></td>
               <td><span class="badge bg-secondary bg-opacity-25 text-light">${e.yaml.type}</span></td>
               <td class="fw-medium">${sanitize(e.yaml.title || humanizeId(e.id))}</td>
               <td><span class="project-tag">${sanitize(e.yaml.project || '')}</span></td>

@@ -14,6 +14,8 @@ import { renderTags } from './views/tags.js';
 import { renderPostMortem } from './views/post-mortem.js';
 import { renderKnowledgeGaps } from './views/knowledge-gaps.js';
 import { renderImpactRadar } from './views/impact-radar.js';
+import { renderSkills } from './views/skills.js';
+import { renderPRReviews } from './views/pr-reviews.js';
 import './views/feature-content.js';
 import './views/entity-content.js';
 
@@ -32,7 +34,9 @@ const VIEW_RENDERERS = {
   'incidents': () => renderTrackingTable('incidents', 'incident'),
   'tickets': () => renderTrackingTable('tickets', 'ticket'),
   'updates': () => renderTrackingTable('updates', 'update'),
-  'sessions': () => renderTrackingTable('sessions', 'session')
+  'sessions': () => renderTrackingTable('sessions', 'session'),
+  'skills': renderSkills,
+  'pr-reviews': renderPRReviews
 };
 
 /** Boot the application. */
@@ -98,7 +102,9 @@ function updateBadgeCounts(data, project) {
     'incident-count': entities.filter(e => e.yaml.type === 'incident' && ['open', 'investigating', 'mitigated'].includes(e.yaml.status)).length,
     'ticket-count': entities.filter(e => e.yaml.type === 'ticket' && e.yaml.status === 'open').length,
     'update-count': entities.filter(e => e.yaml.type === 'update').length,
-    'session-count': entities.filter(e => e.yaml.type === 'session').length
+    'session-count': entities.filter(e => e.yaml.type === 'session').length,
+    'skill-count': entities.filter(e => e.yaml.type === 'skill').length,
+    'pr-count': entities.filter(e => e.yaml.type === 'pr-review').length
   };
 
   Object.entries(counts).forEach(([id, count]) => {

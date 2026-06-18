@@ -100,14 +100,19 @@ def cmd_global():
     print(f"✓ Regenerated {root_claude}")
 
 
-def cmd_project(target, slug, author):
+def cmd_project(target, slug, author, tracker=None, repo_url=None):
     if not target:
-        sys.exit("Usage: install.py --project <path> [--slug <slug>] [--author <name>]")
+        sys.exit("Usage: install.py --project <path> [--slug <slug>] [--author <name>] [--tracker <t>] [--repo-url <url>]")
     repo = os.path.abspath(os.path.expanduser(target))
     slug = slug or os.path.basename(repo.rstrip("/"))
     author = author or "robin"
 
     binding = {"vault": VAULT_ROOT, "project": slug, "author": author}
+    # Optional tracker defaults so work-item refs (tracker/ref-id/ref-url) can be filled and linked.
+    if tracker:
+        binding["tracker"] = tracker
+    if repo_url:
+        binding["repo-url"] = repo_url
     with open(os.path.join(repo, ".knowledge.json"), "w", encoding="utf-8") as fh:
         fh.write(json.dumps(binding, indent=2) + "\n")
     print(f"✓ Wrote {os.path.join(repo, '.knowledge.json')}  (project: {slug})")
@@ -166,13 +171,13 @@ def main():
         cmd_global()
     elif "project" in flags:
         target = flags["project"] if isinstance(flags["project"], str) else (pos[0] if pos else None)
-        cmd_project(target, flags.get("slug"), flags.get("author"))
+        cmd_project(target, flags.get("slug"), flags.get("author"), flags.get("tracker"), flags.get("repo-url"))
     else:
         print(
             "Knowledge Kit installer\n"
-            "  --global                                                   install skills to ~/.claude + regen vault CLAUDE.md\n"
-            "  --project <path> [--slug s] [--author a]                   connect a repo\n"
-            "  add-tool <name> --target <path> [--scope] [--channel]      register a tool"
+            "  --global                                                              install skills to ~/.claude + regen vault CLAUDE.md\n"
+            "  --project <path> [--slug s] [--author a] [--tracker t] [--repo-url u]  connect a repo\n"
+            "  add-tool <name> --target <path> [--scope] [--channel]                 register a tool"
         )
 
 

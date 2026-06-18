@@ -1,5 +1,4 @@
 ---
-id: 68
 type: project
 name: my-loop
 title: MyLoop — Real-World Territory Capture Game

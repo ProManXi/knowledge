@@ -13,6 +13,20 @@ You are running the **update-session** command of the knowledge kit.
 
 ## 2. Load the rules
 - Read `<vault>/_kit/INSTRUCTIONS.md` and `<vault>/_guide.md` fully and follow them.
+- Every file you write obeys the **Living History** rule (refresh current-state, append/compact
+  `## Evolution`), the **Content Style** rule (storyteller narrative + tables when data is definite),
+  and the **Work-Item Identity** rule (record the real `tracker`/`ref-id`/`ref-url`; never invent an
+  ID; no `id:` field) — all in INSTRUCTIONS.md.
+
+## 2.5 Branch: did we review PRs or resolve bugs?
+- If this conversation reviewed pull requests (read/critiqued a diff, ran `code-review`, discussed
+  PR findings, approved/requested changes) → run the **PR Review Flow** in INSTRUCTIONS.md **once per
+  PR**: resolve/create the feature, then (for a bugfix) resolve/create the bug, then create the
+  `pr-reviews/pr-YYYY-MM-DD-{desc}.md` entity and link PR ↔ bug ↔ feature. **N PRs ⇒ N pr- files; each
+  bugfix PR ⇒ its own bug- file.** Use the visual, plain-language PR template from `_guide.md`.
+- If bugs were fixed without a PR review → create **one `bug-` file per real bug**, each linked to
+  its feature with all related docs updated. Never merge several real items into one entity.
+- Then continue with steps 3-7 to log the session. Otherwise → continue with the normal flow below.
 
 ## 3. Session file
 - Find or create today's `ses-YYYY-MM-DD-{desc}.md` under the right feature in
@@ -29,6 +43,18 @@ You are running the **update-session** command of the knowledge kit.
 ## 5. File tracking
 - Record every source file touched in the entity's `files:` YAML (with role) AND add new files
   to the feature's `## File Map`.
+
+## 5.5 Skill extraction (patterns AND knowledge gaps)
+- Scan the session for reusable patterns, gotchas, or architectural rules — **and** for gap-driven
+  skills: a knowledge gap that *caused* a bug, work that wasn't/couldn't be reviewed, or a recurring
+  gotcha worth remembering for the product (criteria in INSTRUCTIONS.md §Skill Extraction).
+- **Dedup-check FIRST:** verify the knowledge isn't already in this project's `skills/`, the repo's
+  `.claude/skills/`, or elsewhere in the vault (other projects' `skills/` and `info-*.md`). If it
+  exists → strengthen that skill instead of duplicating; if better placed in an info file, skip.
+- For each surviving candidate: create or surgically update `skl-{name}.md` in the vault under `projects/{project}/skills/`.
+- If `.knowledge.json` is in the current working directory (running from code repo): also write/update `.claude/skills/{category}/SKILL.md` using SKILL.md frontmatter (`name`, `description`, `origin: extracted-from-session-YYYY-MM-DD`) + same content body.
+- **Register into the project's skill-gate tables** (when running from the code repo): classify each extracted skill into a lifecycle stage and idempotently add a row to that stage's gate table in `CLAUDE.md` (or the repo's primary AI instruction file) — **Pre-Check-in** (write-time, before commit) or **Pre-PR** (review-time). Create the `## {Stage} Skill Gate` section if missing; keep the set of tables small (≤3-4) so every skill falls under one. See INSTRUCTIONS.md §Skill Extraction.
+- Tell the user what was extracted/updated and which gate table it was registered in, or skip silently if nothing qualifies.
 
 ## 6. Spec
 - Reconcile `<vault>/projects/{project}/spec.md` if architecture/behaviors changed.

@@ -24,9 +24,14 @@ You are running the **packup** command of the knowledge kit.
   create `upd-YYYY-MM-DD-{desc}.md` with `triggered-by:`, set `spawned:` on the source,
   append one line to the feature's `## Change History`. (See INSTRUCTIONS.md.)
 
-## 5. Final spec reconciliation
+## 5. Living-History compaction pass
+- For each living doc touched today (info files, hubs, specs, bugs, pr-reviews), compact its
+  `## Evolution` trail per INSTRUCTIONS.md: merge same-topic entries, roll older months into a
+  summary, keep creation + milestones. Current-state sections stay current.
+
+## 6. Final spec reconciliation
 - Read `<vault>/projects/{project}/spec.md` fully; add new facts, remove outdated info,
   flag contradictions.
 
-## 6. Rebuild dashboard data (mandatory)
+## 7. Rebuild dashboard data (mandatory)
 - Run `python3 <vault>/dashboard/build_data.py`. Then list EVERY file created or modified.

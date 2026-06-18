@@ -51,7 +51,7 @@ function renderDefaultTable(items, type) {
       <tbody>
         ${items.map(e => `
           <tr data-id="${e.id}" role="button">
-            <td><span class="entity-id">${workItemId(e.yaml.type, e.numericId)}</span></td>
+            <td><span class="entity-id">${workItemId(e)}</span></td>
             <td class="fw-medium">${sanitize(e.yaml.title || humanizeId(e.id))}</td>
             <td><span class="project-tag">${sanitize(e.yaml.project || '')}</span></td>
             <td><code class="text-muted small">${e.yaml.feature || ''}</code></td>
@@ -74,7 +74,7 @@ function renderTicketTable(items) {
       <tbody>
         ${items.map(e => `
           <tr data-id="${e.id}" role="button">
-            <td><span class="entity-id">${workItemId('ticket', e.numericId)}</span></td>
+            <td><span class="entity-id">${workItemId(e)}</span></td>
             <td class="fw-medium">${sanitize(e.yaml.title || humanizeId(e.id))}</td>
             <td><span class="project-tag">${sanitize(e.yaml.project || '')}</span></td>
             <td>${sanitize(e.yaml.customer || '')}</td>
@@ -96,7 +96,7 @@ function renderUpdateTable(items) {
       <tbody>
         ${items.map(e => `
           <tr data-id="${e.id}" role="button">
-            <td><span class="entity-id">${workItemId('update', e.numericId)}</span></td>
+            <td><span class="entity-id">${workItemId(e)}</span></td>
             <td class="fw-medium">${sanitize(e.yaml.title || humanizeId(e.id))}</td>
             <td><span class="project-tag">${sanitize(e.yaml.project || '')}</span></td>
             <td><span class="badge bg-secondary bg-opacity-25 text-light">${sanitize(e.yaml['change-type'] || '')}</span></td>
@@ -118,7 +118,7 @@ function renderSessionTable(items) {
       <tbody>
         ${items.map(e => `
           <tr data-id="${e.id}" role="button">
-            <td><span class="entity-id">${workItemId('session', e.numericId)}</span></td>
+            <td><span class="entity-id">${workItemId(e)}</span></td>
             <td class="fw-medium">${sanitize(e.yaml.title || humanizeId(e.id))}</td>
             <td><span class="project-tag">${sanitize(e.yaml.project || '')}</span></td>
             <td><code class="text-muted small">${e.yaml.feature || ''}</code></td>

@@ -1,5 +1,4 @@
 ---
-id: 78
 type: decision
 title: H3 Hexagonal Grid for Territory Representation
 date: 2026-05-27

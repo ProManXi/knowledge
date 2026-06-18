@@ -1,5 +1,4 @@
 ---
-id: 75
 type: feature
 title: Leaderboard — Info
 project: my-loop

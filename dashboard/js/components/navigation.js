@@ -24,7 +24,9 @@ const VIEW_TITLES = {
   incidents: 'Incident Tracking',
   tickets: 'Ticket Tracking',
   updates: 'Updates',
-  sessions: 'Sessions'
+  sessions: 'Sessions',
+  skills: 'Skills',
+  'pr-reviews': 'PR Reviews'
 };
 
 /** Initializes navigation click handlers. */

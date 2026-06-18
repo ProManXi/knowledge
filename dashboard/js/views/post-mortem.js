@@ -117,7 +117,7 @@ export function renderPostMortem() {
                       <div class="taxonomy-items">
                         ${items.map(item => `
                           <div class="taxonomy-item" data-id="${item.entity.id}">
-                            <span class="taxonomy-item-id">${workItemId('incident', item.entity.numericId)}</span>
+                            <span class="taxonomy-item-id">${workItemId(item.entity)}</span>
                             <span class="taxonomy-item-text">${sanitize(item.text.substring(0, 80))}${item.text.length > 80 ? '…' : ''}</span>
                           </div>
                         `).join('')}
@@ -143,7 +143,7 @@ export function renderPostMortem() {
                       <div class="lesson-text">${sanitize(lesson.text)}</div>
                       <div class="lesson-source">
                         ${severityBadge(lesson.entity.yaml.severity)}
-                        <span class="text-muted">${workItemId('incident', lesson.entity.numericId)} · ${lesson.entity.yaml.date}</span>
+                        <span class="text-muted">${workItemId(lesson.entity)} · ${lesson.entity.yaml.date}</span>
                       </div>
                     </div>
                   `).join('')}
@@ -163,7 +163,7 @@ export function renderPostMortem() {
           ${timelines.length > 0 ? timelines.map(tl => `
             <div class="pm-timeline-group">
               <div class="pm-timeline-header" data-id="${tl.entity.id}">
-                <span class="entity-id-badge small">${workItemId('incident', tl.entity.numericId)}</span>
+                <span class="entity-id-badge small">${workItemId(tl.entity)}</span>
                 <strong>${sanitize(tl.entity.yaml.title)}</strong>
                 ${severityBadge(tl.entity.yaml.severity)}
                 <span class="text-muted ms-auto">${tl.entity.yaml.date}</span>
@@ -203,7 +203,7 @@ export function renderPostMortem() {
               <tbody>
                 ${incidents.map(inc => `
                   <tr class="clickable-row" data-id="${inc.id}" style="cursor:pointer">
-                    <td>${workItemId('incident', inc.numericId)}</td>
+                    <td>${workItemId(inc)}</td>
                     <td>${sanitize(inc.yaml.title || inc.id)}</td>
                     <td><span class="project-tag">${inc.yaml.project}</span></td>
                     <td>${severityBadge(inc.yaml.severity)}</td>

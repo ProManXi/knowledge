@@ -1,5 +1,4 @@
 ---
-id: 80
 type: decision
 title: PostgreSQL + PostGIS Over SQL Server
 date: 2026-05-27
