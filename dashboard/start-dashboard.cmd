@@ -1,5 +1,6 @@
 @echo off
 cd /d "%~dp0"
+call "%~dp0..\sync-vault.cmd"
 set PY=python
 where python >nul 2>&1 || set PY=py
 echo [1/3] Building dashboard data...
