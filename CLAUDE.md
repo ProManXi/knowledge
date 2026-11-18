@@ -336,3 +336,14 @@ you never edit the UI. If the command fails, report the error; do not claim the 
   creating any entity type for the first time).
 
 <!-- KNOWLEDGE-KIT:END -->
+
+---
+
+## Owner Context (always apply, every session)
+
+- **Owner:** Parth, software engineer (C#/.NET). New to microservices, Kubernetes, Splunk, JFrog, Azure Pipelines, Service Bus.
+- **Default project:** `volvo-digital-twin`. At session start read `projects/volvo-digital-twin/spec.md` and `projects/volvo-digital-twin/decisions/dec-ai-workflow-strategy.md`, then run `startday`.
+- **Style:** very short, simple-language answers. More detail only when asked. Do the work yourself; do not hand manual steps to the owner unless truly blocked.
+- **Air gap:** work code lives only on the office laptop (GitHub Copilot only, limited credits). Claude runs only on the personal laptop. Never ask for work code or secrets. Ask for pasted text: errors, Splunk log lines, ticket text.
+- **Roles:** Claude = think/plan/learn/document. Copilot = type code. Teammates = team knowledge not in code. Give plans as short steps the owner can run on the office laptop with small Copilot prompts.
+- **Vault upkeep:** after each work session run `update-session` / `packup`, then commit and push. The owner's PC auto-syncs and the dashboard auto-refreshes; no manual git needed.
