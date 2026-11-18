@@ -38,3 +38,4 @@ TABLE date, project, feature, author FROM "" WHERE type = "session" SORT date DE
 - [[knowledge-kit]]
 - [[my-loop]]
 - [[shop-stream]]
+- [[volvo-digital-twin]]
