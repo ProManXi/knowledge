@@ -117,3 +117,19 @@ function updateBadgeCounts(data, project) {
 }
 
 boot();
+
+
+// AUTO-REFRESH: reload the dashboard when vault data changes (checked every 10s).
+(function autoRefresh() {
+  const strip = (t) => t.replace(/"generated":\s*"[^"]*",?/, '');
+  let last = null;
+  setInterval(async () => {
+    try {
+      const r = await fetch('data.json', { cache: 'no-store' });
+      if (!r.ok) return;
+      const t = strip(await r.text());
+      if (last !== null && t !== last) { location.reload(); return; }
+      last = t;
+    } catch (e) { /* offline or server restarting: ignore */ }
+  }, 10000);
+})();

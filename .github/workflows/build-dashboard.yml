@@ -1,0 +1,18 @@
+name: build-dashboard
+on:
+  push:
+    branches: [main]
+    paths: ['projects/**']
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 dashboard/build_data.py
+      - run: |
+          git config user.name "vault-bot"
+          git config user.email "vault-bot@users.noreply.github.com"
+          git add dashboard/data.json
+          git diff --cached --quiet || (git commit -m "rebuild dashboard data [skip ci]" && git push)
