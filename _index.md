@@ -32,10 +32,5 @@ TABLE date, project, feature, author FROM "" WHERE type = "session" SORT date DE
 
 ## Projects
 
-- [[cloud-pay]]
-- [[dev-forge]]
-- [[health-pulse]]
-- [[knowledge-kit]]
 - [[my-loop]]
-- [[shop-stream]]
 - [[volvo-digital-twin]]
